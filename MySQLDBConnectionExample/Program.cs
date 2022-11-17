@@ -14,7 +14,7 @@ namespace MySQLDBConnectionExample
             string server = "LOCALHOST";
             string database = "jensenmysqlapp";
             string username = "root";
-            string pass = "SokrateS13";
+            string pass = ""; //Ange lösenord
 
             string strConn = $"SERVER={server};DATABASE={database};UID={username};PASSWORD={pass};";
 
