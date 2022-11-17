@@ -33,7 +33,8 @@ namespace MySQLDBConnectionExample
                 Console.WriteLine("------------------------------");
                 Console.WriteLine("1. Skriv data");
                 Console.WriteLine("2. Hämta data");
-                Console.WriteLine("3. Avsluta");
+                Console.WriteLine("3. Ta bort data");
+                Console.WriteLine("4. Avsluta");
 
                 //Låta användaren välja ett alternativ
                 input = Console.ReadKey();
@@ -50,6 +51,10 @@ namespace MySQLDBConnectionExample
                         FetchData(conn);
                         break;
                     case "3":
+                        Console.Clear();
+                        RemoveData(conn);
+                        break;
+                    case "4":
                         break;
                     default:
                         Console.WriteLine("Du har matat in ett felaktigt värde. (Press any key to continue...)");
@@ -59,7 +64,7 @@ namespace MySQLDBConnectionExample
                 }
 
 
-            } while (input.KeyChar.ToString() != "3");
+            } while (input.KeyChar.ToString() != "4");
 
         }
 
@@ -108,7 +113,7 @@ namespace MySQLDBConnectionExample
                 Console.WriteLine($"Name: {reader["persons_name"]} Age: {reader["persons_age"]}");
 
                 //Spara data till Lista
-                new Person(Convert.ToInt32( reader["persons_id"]), reader["persons_name"].ToString(), Convert.ToInt32( reader["persons_age"]));
+                new Person(Convert.ToInt32(reader["persons_id"]), reader["persons_name"].ToString(), Convert.ToInt32(reader["persons_age"]));
             }
 
             //Stänga DB koppling
@@ -116,6 +121,50 @@ namespace MySQLDBConnectionExample
 
             Console.WriteLine("Data Fetched successfully! Press any key to continue");
             Console.ReadKey();
+        }
+
+        public static void RemoveData(MySqlConnection conn)
+        {
+            //Om ingen data har hämtats, hämta data
+            if (Person.persons.Count == 0)
+            {
+                FetchData(conn);
+                Console.Clear();
+            }
+
+            int count = 1;
+            //Skriva ut lista till Konsol
+            foreach (Person person in Person.persons)
+            {
+                Console.WriteLine($"{count}. {person.name} - {person.age}");
+                count++;
+            }
+
+            //Användaren anger nummret Count för den person som den vill ta bort.
+            Console.WriteLine("Ange det nummer du vill ta bort!");
+            int input = Convert.ToInt32(Console.ReadLine());
+
+            //Hämta ID värdet av det valda objektet
+            int selectedID = Person.persons[input -1].id;
+
+            //Anropa Stored Procuedure med det valda värdet -1's ID värde
+            // SQL Querry för INSERT
+            string sqlQuerry = $"CALL persons_delete({selectedID});";
+
+            // Skapa MySQLCOmmand objekt
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand(sqlQuerry, conn);
+
+            //Exekvera MySQLCommand.
+            cmd.ExecuteReader();
+
+            //Stänger kopplingen
+            conn.Close();
+
+            //Anropa och skriv ut den nya tabellen
+            Console.Clear();
+            FetchData(conn);
+
         }
 
     }
